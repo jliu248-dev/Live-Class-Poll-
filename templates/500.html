@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Server error · Live Class Poll{% endblock %}
+
+{% block content %}
+  <div class="error-page">
+    <span class="error-code">500</span>
+    <h1>Something broke on our end</h1>
+    <p class="lead">{{ message }} If it keeps happening, ask your teacher to restart the poll.</p>
+    <div class="error-actions">
+      <a class="btn btn-primary" href="javascript:location.reload()">Try again</a>
+      <a class="btn btn-ghost" href="{{ url_for('home') }}">Back to home</a>
+    </div>
+  </div>
+{% endblock %}

@@ -299,6 +299,7 @@ code {
 /* ---------- Error page ---------- */
 .error-page { text-align: center; padding: 64px 0; }
 .error-page .lead { margin: 0 auto 24px; }
+.error-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
 .error-code {
   display: block;
   font-size: 5rem;

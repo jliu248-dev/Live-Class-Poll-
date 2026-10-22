@@ -179,12 +179,18 @@ def create_question():
     form = {"text": text, "options": options or ["", ""]}
 
     error = None
-    if not text:
-        error = "Please type a question."
+    if not text and not filled:
+        error = f"The form is empty. Type a question and at least {MIN_OPTIONS} answer options."
+    elif not text:
+        error = "Please type a question. The question box is empty."
     elif len(text) > MAX_QUESTION_LENGTH:
         error = f"The question is too long (max {MAX_QUESTION_LENGTH} characters)."
     elif len(filled) < MIN_OPTIONS:
-        error = f"Please fill in at least {MIN_OPTIONS} answer options."
+        filled_text = "no answer options" if not filled else "only 1 answer option"
+        error = (
+            f"You filled in {filled_text}. "
+            f"A question needs at least {MIN_OPTIONS} so students have a choice."
+        )
     elif len(filled) > MAX_OPTIONS:
         error = f"A question can have at most {MAX_OPTIONS} answer options."
     elif any(len(o) > MAX_OPTION_LENGTH for o in filled):
@@ -315,13 +321,18 @@ def api_current():
         )
 
 
+def is_whole_number(value):
+    # bool is a subclass of int in Python, so rule it out explicitly.
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
 @app.post("/api/vote")
 def api_vote():
     data = request.get_json(silent=True)
     if (
         not isinstance(data, dict)
-        or not isinstance(data.get("question_id"), int)
-        or not isinstance(data.get("option"), int)
+        or not is_whole_number(data.get("question_id"))
+        or not is_whole_number(data.get("option"))
     ):
         return api_error("Your vote couldn't be read. Please refresh the page and try again.", 400)
     if not has_joined():
@@ -329,13 +340,22 @@ def api_vote():
 
     voter = voter_id()
     with lock:
-        question = questions.get(state["current_id"])
-        if question is None or question["id"] != data["question_id"]:
+        question = questions.get(data["question_id"])
+        if question is None:
+            return api_error(
+                "That question doesn't exist. It may have been deleted. Showing the current one now.",
+                404,
+            )
+        if question["id"] != state["current_id"]:
             return api_error("This question is no longer active. Showing the current one now.", 409)
         if not question["open"]:
             return api_error("Voting is closed for this question.", 409)
         if not 0 <= data["option"] < len(question["options"]):
-            return api_error("That answer option doesn't exist. Please pick another.", 400)
+            return api_error(
+                f"That answer option doesn't exist. Please pick one of the "
+                f"{len(question['options'])} options shown.",
+                400,
+            )
         if voter in question["voters"]:
             return api_error("You've already voted on this question.", 409)
 
@@ -365,16 +385,41 @@ def handle_http_error(error):
 
     if request.path.startswith("/api/"):
         return api_error(message, error.code)
-    return render_template("error.html", code=error.code, message=message), error.code
+    if error.code == 404:
+        return render_error_page("404.html", 404, message)
+    if error.code == 500:
+        return render_error_page("500.html", 500, message)
+    return render_error_page("error.html", error.code, message)
 
 
 @app.errorhandler(Exception)
 def handle_unexpected_error(error):
+    # Log the full traceback in the terminal for us; the browser only gets a friendly page.
     app.logger.exception("Unexpected error")
     message = "Something went wrong on the server. Please try again."
     if request.path.startswith("/api/"):
         return api_error(message, 500)
-    return render_template("error.html", code=500, message=message), 500
+    return render_error_page("500.html", 500, message)
+
+
+def render_error_page(template, code, message):
+    try:
+        return render_template(template, code=code, message=message), code
+    except Exception:
+        # If even the error page fails to render, fall back to plain HTML rather than a traceback.
+        app.logger.exception("Error page failed to render")
+        return (
+            f"<!doctype html><title>Error {code}</title>"
+            f"<h1>Error {code}</h1><p>Something went wrong. Please go back and try again.</p>"
+            f'<p><a href="/">Back to home</a></p>',
+            code,
+        )
+
+
+# Never run with the debugger, even if FLASK_DEBUG=1 or `flask run --debug` is used:
+# the debugger shows tracebacks in the browser.
+app.config["DEBUG"] = False
+app.config["PROPAGATE_EXCEPTIONS"] = False
 
 
 if __name__ == "__main__":

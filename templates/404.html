@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Page not found · Live Class Poll{% endblock %}
+
+{% block content %}
+  <div class="error-page">
+    <span class="error-code">404</span>
+    <h1>We couldn't find that</h1>
+    <p class="lead">{{ message }}</p>
+    <div class="error-actions">
+      <a class="btn btn-primary" href="{{ url_for('home') }}">Back to home</a>
+      <a class="btn btn-ghost" href="{{ url_for('vote') }}">Join a poll</a>
+      <a class="btn btn-ghost" href="{{ url_for('teacher') }}">Teacher dashboard</a>
+    </div>
+  </div>
+{% endblock %}

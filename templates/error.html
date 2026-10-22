@@ -7,6 +7,8 @@
     <span class="error-code">{{ code }}</span>
     <h1>Something's not right</h1>
     <p class="lead">{{ message }}</p>
-    <a class="btn btn-primary" href="{{ url_for('home') }}">Back to home</a>
+    <div class="error-actions">
+      <a class="btn btn-primary" href="{{ url_for('home') }}">Back to home</a>
+    </div>
   </div>
 {% endblock %}
