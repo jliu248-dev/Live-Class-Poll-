@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Projector · Live Class Poll{% endblock %}
+{% block body_class %}projector{% endblock %}
+{% block header %}{% endblock %}
+{% block main_class %}projector-main{% endblock %}
+
+{% block content %}
+  <div class="proj-top">
+    <div class="proj-join">
+      <span class="proj-join-label">Go to</span>
+      <span class="proj-join-url">{{ site_address }}</span>
+      <span class="proj-join-label">Code</span>
+      <span class="proj-join-code">{{ join_code }}</span>
+    </div>
+    <div id="proj-counter" class="proj-counter"></div>
+  </div>
+
+  <div id="connection" class="connection-banner" hidden>Can't reach the server. Retrying…</div>
+
+  <div id="waiting" class="proj-waiting">
+    <div class="waiting-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+    <p class="proj-big-label">Join with code</p>
+    <div class="proj-big-code">{{ join_code }}</div>
+    <p>Go to <strong>{{ site_address }}</strong> on your phone and enter the code.</p>
+    <h1>Waiting for the next question…</h1>
+  </div>
+
+  <div id="live" class="proj-live" hidden>
+    <h1 id="proj-question" class="proj-question"></h1>
+    <div id="proj-bars" class="proj-bars"></div>
+    <div class="proj-footer">
+      <span id="proj-status" class="proj-status"></span>
+      <span class="proj-total"><b id="proj-total">0</b> <span id="proj-total-label">votes</span></span>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='projector.js') }}"></script>
+{% endblock %}

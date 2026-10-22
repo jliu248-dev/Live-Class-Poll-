@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Vote · Live Class Poll{% endblock %}
+{% block main_class %}container container-narrow{% endblock %}
+
+{% block content %}
+  <div id="connection" class="connection-banner" hidden>Can't reach the server. Retrying…</div>
+
+  <section id="vote-card" class="card vote-card">
+    <div id="vote-loading" class="vote-state">
+      <div class="waiting-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+      <p class="muted">Loading…</p>
+    </div>
+
+    <div id="vote-waiting" class="vote-state" hidden>
+      <div class="waiting-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+      <h1>Hang tight</h1>
+      <p class="muted">Your teacher hasn't started a question yet. This page will update by itself.</p>
+    </div>
+
+    <div id="vote-question" hidden>
+      <div id="vote-counter" class="vote-counter"></div>
+      <h1 id="vote-text" class="vote-text"></h1>
+      <div id="vote-error" class="alert alert-error" role="alert" hidden></div>
+      <div id="vote-options" class="vote-options"></div>
+      <div id="vote-done" class="vote-done" hidden>
+        <span class="check" aria-hidden="true">✓</span>
+        <div>
+          <strong>Vote recorded!</strong>
+          <p class="muted">Keep an eye on the projector. The next question will appear here automatically.</p>
+        </div>
+      </div>
+      <div id="vote-closed" class="vote-closed" hidden>Voting is closed for this question.</div>
+    </div>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='vote.js') }}"></script>
+{% endblock %}

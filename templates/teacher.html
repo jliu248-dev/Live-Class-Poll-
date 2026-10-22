@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Teacher · Live Class Poll{% endblock %}
+
+{% block content %}
+  <div class="page-head">
+    <div>
+      <h1>Teacher dashboard</h1>
+      <p class="muted">Students go to <code>{{ site_address }}</code> and enter the class code.</p>
+    </div>
+    <div class="head-actions">
+      <div class="code-badge">
+        <span>Class code</span>
+        <strong>{{ join_code }}</strong>
+        <form method="post" action="{{ url_for('new_code') }}"
+              onsubmit="return confirm('Make a new code? Students will need to enter it again.');">
+          <button class="btn btn-link btn-sm" type="submit">New code</button>
+        </form>
+      </div>
+      <a class="btn btn-ghost" href="{{ url_for('projector') }}" target="_blank" rel="noopener">Open projector ↗</a>
+    </div>
+  </div>
+
+  <section class="now-showing card">
+    <div class="now-label">
+      <span class="pulse {% if not current %}pulse-off{% endif %}" aria-hidden="true"></span>
+      {% if current %}On the projector now{% else %}Projector is on the waiting screen{% endif %}
+    </div>
+    <div class="now-text">{% if current %}{{ current.text }}{% else %}No question showing{% endif %}</div>
+    <div class="now-actions">
+      <form method="post" action="{{ url_for('next_question') }}">
+        <button class="btn btn-primary" type="submit">{% if current %}Next question →{% else %}Start first question →{% endif %}</button>
+      </form>
+      {% if current %}
+        <form method="post" action="{{ url_for('toggle_question', question_id=current.id) }}">
+          <button class="btn btn-ghost" type="submit">{% if current.open %}Close voting{% else %}Reopen voting{% endif %}</button>
+        </form>
+        <form method="post" action="{{ url_for('clear_projector') }}">
+          <button class="btn btn-ghost" type="submit">Hide question</button>
+        </form>
+      {% endif %}
+    </div>
+  </section>
+
+  <div class="teacher-grid">
+    <section class="card">
+      <h2>New question</h2>
+      {% if error %}<div class="alert alert-error" role="alert">{{ error }}</div>{% endif %}
+      <form method="post" action="{{ url_for('create_question') }}" class="question-form" novalidate>
+        <label class="field">
+          <span>Question</span>
+          <input type="text" name="text" value="{{ form.text }}" maxlength="{{ max_question_length }}"
+                 placeholder="e.g. Which sorting algorithm is fastest on average?" autofocus>
+        </label>
+
+        <div class="field">
+          <span>Answer options</span>
+          <div id="options" class="option-inputs" data-max="{{ max_options }}">
+            {% for option in form.options %}
+              <div class="option-input">
+                <span class="swatch opt-{{ loop.index0 }}" aria-hidden="true"></span>
+                <input type="text" name="options" value="{{ option }}" maxlength="{{ max_option_length }}"
+                       placeholder="Option {{ loop.index }}" aria-label="Option {{ loop.index }}">
+              </div>
+            {% endfor %}
+          </div>
+          <button type="button" id="add-option" class="btn btn-link">+ Add another option</button>
+        </div>
+
+        <button class="btn btn-primary btn-block" type="submit">Add question</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Questions</h2>
+        <span class="count-badge">{{ questions|length }}</span>
+      </div>
+
+      {% if not questions %}
+        <div class="empty">
+          <p><strong>No questions yet.</strong></p>
+          <p class="muted">Add your first question on the left. It will go straight onto the projector.</p>
+        </div>
+      {% else %}
+        <ol class="question-list">
+          {% for q in questions %}
+            <li class="question-item status-{{ q.status }}">
+              <div class="question-top">
+                <span class="q-num">{{ q.number }}</span>
+                <div class="q-body">
+                  <div class="q-text">{{ q.text }}</div>
+                  <div class="q-options">
+                    {% for option in q.options %}
+                      <span class="chip"><span class="swatch opt-{{ loop.index0 }}"></span>{{ option }} <b>{{ q.votes[loop.index0] }}</b></span>
+                    {% endfor %}
+                  </div>
+                </div>
+                <span class="status-pill pill-{{ q.status }}">
+                  {% if q.status == 'live' %}Live{% elif q.status == 'closed' %}Showing · closed{% elif q.status == 'waiting' %}Queued{% else %}Done{% endif %}
+                </span>
+              </div>
+              <div class="q-actions">
+                {% if q.status not in ['live', 'closed'] %}
+                  <form method="post" action="{{ url_for('show_question', question_id=q.id) }}">
+                    <button class="btn btn-sm btn-soft" type="submit">Show on projector</button>
+                  </form>
+                {% endif %}
+                <form method="post" action="{{ url_for('toggle_question', question_id=q.id) }}">
+                  <button class="btn btn-sm btn-ghost" type="submit">{% if q.open %}Close voting{% else %}Reopen voting{% endif %}</button>
+                </form>
+                <form method="post" action="{{ url_for('reset_question', question_id=q.id) }}"
+                      onsubmit="return confirm('Clear all votes for this question?');">
+                  <button class="btn btn-sm btn-ghost" type="submit">Reset votes</button>
+                </form>
+                <form method="post" action="{{ url_for('delete_question', question_id=q.id) }}"
+                      onsubmit="return confirm('Delete this question?');">
+                  <button class="btn btn-sm btn-danger-ghost" type="submit">Delete</button>
+                </form>
+              </div>
+            </li>
+          {% endfor %}
+        </ol>
+      {% endif %}
+    </section>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='teacher.js') }}"></script>
+{% endblock %}

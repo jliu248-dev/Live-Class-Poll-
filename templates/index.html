@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="hero">
+    <span class="eyebrow">Real-time classroom voting</span>
+    <h1>Ask the room.<br><span class="gradient-text">See answers live.</span></h1>
+    <p class="lead">Create a few questions, put the results on the projector, and let students vote from their phones. Results update every second.</p>
+    <div class="hero-join">
+      <span class="hero-join-label">Student? Enter your class code</span>
+      {% with code = "", autofocus = false %}{% include "_code_form.html" %}{% endwith %}
+      <a class="hero-teacher-link" href="{{ url_for('teacher') }}">Teacher? Start a poll →</a>
+    </div>
+  </section>
+
+  <section class="role-cards">
+    <a class="role-card" href="{{ url_for('teacher') }}">
+      <span class="role-icon icon-indigo" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+      </span>
+      <h2>Teacher</h2>
+      <p>Write questions, queue them up, and move through them one at a time.</p>
+      <span class="role-link">Open dashboard →</span>
+    </a>
+    <a class="role-card" href="{{ url_for('projector') }}">
+      <span class="role-icon icon-amber" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      </span>
+      <h2>Projector</h2>
+      <p>A big-screen view with live bar charts and the link students use to join.</p>
+      <span class="role-link">Open projector →</span>
+    </a>
+    <a class="role-card" href="{{ url_for('vote') }}">
+      <span class="role-icon icon-emerald" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+      </span>
+      <h2>Student</h2>
+      <p>Enter the 4-digit code and tap an answer. One vote per question, no sign-up needed.</p>
+      <span class="role-link">Join with a code →</span>
+    </a>
+  </section>
+
+  <section class="steps">
+    <div class="step"><span class="step-num">1</span><div><strong>Add questions</strong><p>Each with 2–6 answer choices.</p></div></div>
+    <div class="step"><span class="step-num">2</span><div><strong>Share the code</strong><p>Students go to <code>{{ site_address }}</code> and type the 4-digit code.</p></div></div>
+    <div class="step"><span class="step-num">3</span><div><strong>Watch it update</strong><p>Bars grow as votes arrive.</p></div></div>
+  </section>
+{% endblock %}

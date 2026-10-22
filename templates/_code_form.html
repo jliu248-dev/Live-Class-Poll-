@@ -1,0 +1,6 @@
+<form method="post" action="{{ url_for('join') }}" class="code-form" novalidate>
+  <input type="text" name="code" value="{{ code or '' }}" class="code-input"
+         inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off"
+         placeholder="0000" aria-label="4-digit class code" {% if autofocus is not defined or autofocus %}autofocus{% endif %}>
+  <button class="btn btn-primary btn-lg" type="submit">Join</button>
+</form>

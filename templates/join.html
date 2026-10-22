@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Join · Live Class Poll{% endblock %}
+{% block main_class %}container container-narrow{% endblock %}
+
+{% block content %}
+  <section class="card join-card">
+    <h1>Join the poll</h1>
+    <p class="muted">Enter the 4-digit code shown on the projector.</p>
+    {% if error %}<div class="alert alert-error" role="alert">{{ error }}</div>{% endif %}
+    {% include "_code_form.html" %}
+  </section>
+{% endblock %}
